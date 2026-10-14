@@ -1,0 +1,45 @@
+services:
+  encomenda-service-main-db:
+    build:
+      context: ./encomenda-service/databases/main-database
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_DATABASE: ${ENCOMENDA_DB_NAME:?Variavel obrigatoria}
+      MYSQL_USER: ${ENCOMENDA_DB_USER:?Variavel obrigatoria}
+      MYSQL_PASSWORD: ${ENCOMENDA_DB_PASSWORD:?Variavel obrigatoria}
+      MYSQL_ROOT_PASSWORD: ${ENCOMENDA_DB_ROOT_PASSWORD:?Variavel obrigatoria}
+    ports:
+      - "127.0.0.1:${ENCOMENDA_DB_PORT:?Variavel obrigatoria}:3306"
+    volumes:
+      - encomenda_service_main_db_data:/var/lib/mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'MYSQL_PWD="$$MYSQL_PASSWORD" mysql -h 127.0.0.1 -u "$$MYSQL_USER" "$$MYSQL_DATABASE" -e "SELECT 1" --silent'
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  encomenda-service:
+    build:
+      context: ${ENCOMENDA_API_SRC:?Variavel obrigatoria}
+      dockerfile: ../gestao-encomendas-infra/encomenda-service/app/Dockerfile
+    environment:
+      NODE_ENV: ${ENCOMENDA_NODE_ENV:-production}
+      PORT: "3000"
+      DB_HOST: encomenda-service-main-db
+      DB_PORT: "3306"
+      DB_USERNAME: ${ENCOMENDA_DB_USER:?Variavel obrigatoria}
+      DB_PASSWORD: ${ENCOMENDA_DB_PASSWORD:?Variavel obrigatoria}
+      DB_DATABASE: ${ENCOMENDA_DB_NAME:?Variavel obrigatoria}
+    ports:
+      - "127.0.0.1:${ENCOMENDA_API_PORT:?Variavel obrigatoria}:3000"
+    depends_on:
+      encomenda-service-main-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  encomenda_service_main_db_data:
