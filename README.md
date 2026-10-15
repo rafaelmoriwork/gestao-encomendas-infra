@@ -8,9 +8,13 @@ Aqui ficam o `docker-compose.yml`, os Dockerfiles de cada serviço/banco e as va
 
 Cada microserviço é **independente** e pode ter **um ou mais bancos de dados** próprios.
 
+![Arquitetura do TMS](docs/arquitetura.png)
+
 | Serviço | Repositório | Função |
 |---|---|---|
 | `encomenda-service` | [rafaelmoriwork/encomenda-service](https://github.com/rafaelmoriwork/encomenda-service) | Responsável pelo **gerenciamento das encomendas** do TMS. |
+
+> O diagrama mostra a arquitetura completa do TMS. Neste repositório, a infraestrutura configurada até o momento contempla apenas o `encomenda-service`.
 
 ## Estrutura do repositório
 
